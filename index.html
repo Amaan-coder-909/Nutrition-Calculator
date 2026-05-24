@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BiteBuddy</title>
+  <style>
+    :root {
+      --primary: #008080;
+      --secondary: #F0F8FF;
+      --accent: #FFFFFF;
+      --neutral: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--neutral);
+      color: var(--accent);
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: var(--secondary);
+      padding: 0.5rem;
+    }
+
+    nav button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background-color: var(--primary);
+      color: var(--secondary);
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .container {
+      padding: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    form input,
+    select {
+      display: block;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .result {
+      margin-top: 1rem;
+      background: white;
+      color: var(--neutral);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .food-list {
+      margin-top: 1rem;
+    }
+
+    .food-list ul {
+      padding-left: 1rem;
+    }
+
+    .cta {
+      background-color: var(--primary);
+      color: var(--accent);
+      border: none;
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 5px;
+    }
+
+    .message {
+      font-weight: bold;
+      margin-top: 0.5rem;
+      transition: opacity 0.5s ease;
+    }
+
+    #backHomeBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background 0.3s ease, transform 0.2s ease;
+      z-index: 999;
+    }
+
+    #backHomeBtn:hover {
+      background-color: #006666;
+      transform: scale(1.05);
+    }
+
+
+    @media (min-width: 600px) {
+      nav {
+        justify-content: center;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>BiteBuddy</h1>
+  </header>
+  <nav>
+    <button onclick="showPage('add')">Add Food</button>
+    <button onclick="showPage('track')">Track Nutrition</button>
+    <button onclick="showPage('delete')">Delete Food</button>
+  </nav>
+  <div class="container">
+
+    <!-- Add Food -->
+    <div id="add">
+      <h2>Add Food</h2>
+      <form id="addFoodForm">
+        <input type="text" id="foodName" placeholder="Food Name" required />
+        <input type="number" id="calories" placeholder="Calories per 100g" required />
+        <input type="number" id="protein" placeholder="Protein (g) per 100g" required />
+        <input type="number" id="carbs" placeholder="Carbs (g) per 100g" required />
+        <input type="number" id="fat" placeholder="Fat (g) per 100g" required />
+        <button type="submit" class="cta">Save Food</button>
+      </form>
+      <div id="messageBox" class="message"></div>
+    </div>
+
+    <!-- Track Nutrition -->
+    <div id="track" class="hidden">
+      <h2>Track Nutrition</h2>
+      <select id="selectFood"></select>
+      <input type="number" id="quantity" placeholder="Quantity in grams" />
+      <button onclick="calculateNutrition()" class="cta">Calculate</button>
+      <div class="result" id="result"></div>
+    </div>
+
+    <!-- Delete Food -->
+    <div id="delete" class="hidden">
+      <h2>Delete Saved Food</h2>
+      <select id="deleteSelect"></select>
+      <button onclick="deleteFood()" class="cta">Delete</button>
+      <div class="food-list">
+        <h3>Saved Foods:</h3>
+        <ul id="foodList"></ul>
+      </div>
+    </div>
+
+  </div>
+  <a href="exercises.html"><button id="backHomeBtn">🏠 Home</button></a>
+
+  <script>
+    const foodForm = document.getElementById('addFoodForm');
+    const foodList = document.getElementById('foodList');
+    const selectFood = document.getElementById('selectFood');
+    const deleteSelect = document.getElementById('deleteSelect');
+    const messageBox = document.getElementById('messageBox');
+    let foods = JSON.parse(localStorage.getItem('foods')) || [];
+
+    function showPage(page) {
+      document.getElementById('add').classList.add('hidden');
+      document.getElementById('track').classList.add('hidden');
+      document.getElementById('delete').classList.add('hidden');
+      document.getElementById(page).classList.remove('hidden');
+      renderFoods();
+    }
+
+    function renderFoods() {
+      // Populate tracking dropdown
+      selectFood.innerHTML = '';
+      foods.forEach((food, index) => {
+        selectFood.innerHTML += `<option value="${index}">${food.name}</option>`;
+      });
+
+      // Populate delete dropdown and list
+      deleteSelect.innerHTML = '';
+      foodList.innerHTML = '';
+      foods.forEach((food, index) => {
+        deleteSelect.innerHTML += `<option value="${index}">${food.name}</option>`;
+        foodList.innerHTML += `<li>${food.name} (100g): ${food.calories} kcal, ${food.protein}g P, ${food.carbs}g C, ${food.fat}g F</li>`;
+      });
+    }
+
+    function showMessage(text, color) {
+      messageBox.style.color = color;
+      messageBox.textContent = text;
+      messageBox.style.opacity = "1";
+      setTimeout(() => {
+        messageBox.style.opacity = "0";
+      }, 3000);
+    }
+
+    foodForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const newName = foodForm.foodName.value.trim().toLowerCase();
+      const duplicate = foods.some(food => food.name.toLowerCase() === newName);
+
+      if (duplicate) {
+        showMessage("Food already exists", "#ff6b6b");
+        return;
+      }
+
+      const food = {
+        name: foodForm.foodName.value.trim(),
+        calories: parseFloat(foodForm.calories.value),
+        protein: parseFloat(foodForm.protein.value),
+        carbs: parseFloat(foodForm.carbs.value),
+        fat: parseFloat(foodForm.fat.value)
+      };
+      foods.push(food);
+      localStorage.setItem('foods', JSON.stringify(foods));
+      foodForm.reset();
+      renderFoods();
+
+      showMessage("New food added", "#00ff7f");
+    });
+
+    function calculateNutrition() {
+      const index = selectFood.value;
+      const quantity = parseFloat(document.getElementById('quantity').value);
+      if (!foods[index] || isNaN(quantity)) return;
+      const food = foods[index];
+      const factor = quantity / 100;
+      const result = `
+        <strong>${food.name} (${quantity}g)</strong><br>
+        Calories: ${(food.calories * factor).toFixed(2)} kcal<br>
+        Protein: ${(food.protein * factor).toFixed(2)} g<br>
+        Carbs: ${(food.carbs * factor).toFixed(2)} g<br>
+        Fat: ${(food.fat * factor).toFixed(2)} g
+      `;
+      document.getElementById('result').innerHTML = result;
+    }
+
+    function deleteFood() {
+      const index = deleteSelect.value;
+      if (foods[index]) {
+        foods.splice(index, 1);
+        localStorage.setItem('foods', JSON.stringify(foods));
+        renderFoods();
+      }
+    }
+
+    // Initial load
+    renderFoods();
+  </script>
+</body>
+
+</html>
