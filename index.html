@@ -77,6 +77,65 @@ nav button:hover {
   box-shadow: 0 10px 20px rgba(56, 189, 248, 0.25);
 }
 
+    /* MOBILE NAV */
+
+.mobile_top {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.logo_text {
+  font-size: 1.2rem;
+}
+
+.hamburger {
+  border: none;
+  background: var(--card);
+  color: white;
+  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.nav_links {
+  display: flex;
+  gap: 12px;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+  nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile_top {
+    display: flex;
+    margin-bottom: 15px;
+  }
+
+  .nav_links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav_links.active {
+    display: flex;
+  }
+
+  .nav_links button {
+    width: 100%;
+  }
+}
+
 /* CONTAINER */
 
 .container {
@@ -246,11 +305,25 @@ select:focus {
   <header>
     <h1>BiteBuddy</h1>
   </header>
-  <nav>
+ <nav>
+
+  <div class="mobile_top">
+
+    <h2 class="logo_text">Menu</h2>
+
+    <button class="hamburger" onclick="toggleMenu()">
+      ☰
+    </button>
+
+  </div>
+
+  <div class="nav_links" id="navLinks">
     <button onclick="showPage('add')">Add Food</button>
     <button onclick="showPage('track')">Track Nutrition</button>
     <button onclick="showPage('delete')">Delete Food</button>
-  </nav>
+  </div>
+
+</nav>
   <div class="container">
 
     <!-- Add Food -->
@@ -381,6 +454,11 @@ select:focus {
       }
     }
 
+    function toggleMenu() {
+  document
+    .getElementById("navLinks")
+    .classList.toggle("active");
+}
     // Initial load
     renderFoods();
   </script>
